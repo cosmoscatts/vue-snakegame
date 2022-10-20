@@ -5,9 +5,9 @@ export class GameObject {
   hasCalledStart: boolean
 
   constructor() {
+    GAME_OBJECTS.push(this)
     this.timeDelta = 0
     this.hasCalledStart = false
-    GAME_OBJECTS.push(this)
   }
 
   start() {
@@ -26,16 +26,17 @@ export class GameObject {
     this.beforeDestory()
 
     for (const i in GAME_OBJECTS) {
-      const obj = GAME_OBJECTS[i]
-      if (obj === this) {
-        GAME_OBJECTS.splice(parseInt(i), 1)
+      const game = GAME_OBJECTS[i]
+      if (game === this) {
+        GAME_OBJECTS.splice(Number(i), 1)
         break
       }
     }
   }
 }
 
-let lastTimeStamp = 0
+// 上次执行时间
+let lastTimestamp = 0
 
 /**
  * 每一帧执行函数
@@ -47,11 +48,12 @@ const step = (timestamp: number) => {
       game.hasCalledStart = true
     }
     else {
-      game.timeDelta = timestamp - lastTimeStamp
+      game.timeDelta = timestamp - lastTimestamp
       game.update()
     }
   }
-  lastTimeStamp = timestamp
+
+  lastTimestamp = timestamp
   requestAnimationFrame(step)
 }
 

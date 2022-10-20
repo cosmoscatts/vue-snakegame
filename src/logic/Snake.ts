@@ -1,16 +1,17 @@
-import { Cell, type GameMap, GameObject } from '.'
+import { Cell } from './Cell'
+import type { GameMap } from './GameMap'
+import { GameObject } from './GameObject'
 
 export class Snake extends GameObject {
   ctx: CanvasRenderingContext2D
   gameMap: GameMap
   cells: Cell[]
 
-  speed: number // 每秒走的格数
+  direction: number
   dx: number[]
   dy: number[]
-  direction: number // 蛇头方向
-
-  eps: number // 允许的误差
+  speed: number
+  eps: number
 
   constructor(ctx: CanvasRenderingContext2D, gameMap: GameMap) {
     super()
@@ -19,12 +20,11 @@ export class Snake extends GameObject {
     this.gameMap = gameMap
     this.cells = []
 
-    this.speed = 1
+    this.direction = 1 // 蛇头的方向
     this.dx = [0, 1, 0, -1]
     this.dy = [-1, 0, 1, 0]
-    this.direction = 1
-
-    this.eps = 1e-2
+    this.speed = 0.5 // 每秒钟走几格
+    this.eps = 1e-2 // 运行的误差
   }
 
   start() {
@@ -45,12 +45,12 @@ export class Snake extends GameObject {
       return -1
     if (Math.abs(a.x - b.x) < eps) {
       if (a.y < b.y)
-        return 0
-      return 2
+        return 2
+      return 0
     }
-    return a.x < a.y
-      ? 1
-      : 3
+    if (a.x < b.x)
+      return 1
+    return 3
   }
 
   updateBody() {
@@ -58,10 +58,10 @@ export class Snake extends GameObject {
     const d = this.getTailDirection(this.cells[k], this.cells[k - 1])
     if (d >= 0) {
       const distance = this.speed * this.timeDelta / 1000
-      this.cells[k].x += this.dx[d] * distance
-      this.cells[k].y += this.dy[d] * distance
-      this.cells[0].x += this.dx[this.direction] * distance
-      this.cells[0].y += this.dy[this.direction] * distance
+      this.cells[k].x += distance * this.dx[d]
+      this.cells[k].y += distance * this.dy[d]
+      this.cells[0].x += distance * this.dx[this.direction]
+      this.cells[0].y += distance * this.dy[this.direction]
     }
     else {
       const newCells: Cell[] = []
@@ -69,7 +69,7 @@ export class Snake extends GameObject {
       const c = this.cells[1].c + this.dx[this.direction]
       const r = this.cells[1].r + this.dy[this.direction]
       newCells.push(new Cell(c, r))
-      newCells.push(new Cell(c, r))
+      newCells.push(new Cell(c, r)) // 复制一份蛇头，用于下一次移动
       for (let i = 1; i < k; i++)
         newCells.push(this.cells[i])
 
@@ -78,8 +78,9 @@ export class Snake extends GameObject {
   }
 
   render() {
-    const { gameMap: { L }, ctx } = this
-    ctx.fillStyle = '#377BB5'
+    const color = '#377BB5'
+    const { ctx, gameMap: { L } } = this
+    ctx.fillStyle = color
     for (const cell of this.cells) {
       ctx.beginPath()
       ctx.arc(cell.x * L, cell.y * L, L / 2, 0, Math.PI * 2)

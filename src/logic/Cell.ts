@@ -1,6 +1,6 @@
 export class Cell {
-  r: number
   c: number
+  r: number
   x: number
   y: number
 
