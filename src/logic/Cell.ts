@@ -1,9 +1,13 @@
 export class Cell {
+  r: number
+  c: number
   x: number
   y: number
 
-  constructor(x: number, y: number) {
-    this.x = x + 0.5
-    this.y = y + 0.5
+  constructor(c: number, r: number) {
+    this.c = c
+    this.r = r
+    this.x = c + 0.5
+    this.y = r + 0.5
   }
 }
