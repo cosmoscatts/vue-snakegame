@@ -1,0 +1,16 @@
+@import "./font.css";
+
+html,
+body,
+#app {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+html.dark {
+  background-color: #121212;
+  color: white;
+}
