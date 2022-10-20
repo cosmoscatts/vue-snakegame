@@ -7,6 +7,7 @@ export class Snake extends GameObject {
   gameMap: GameMap
   cells: Cell[]
 
+  color: string
   direction: number
   dx: number[]
   dy: number[]
@@ -20,11 +21,12 @@ export class Snake extends GameObject {
     this.gameMap = gameMap
     this.cells = []
 
+    this.color = '#377BB5'
     this.direction = 1 // 蛇头的方向
     this.dx = [0, 1, 0, -1]
     this.dy = [-1, 0, 1, 0]
-    this.speed = 0.5 // 每秒钟走几格
-    this.eps = 1e-2 // 运行的误差
+    this.speed = 8 // 每秒钟走几格
+    this.eps = 1e-1 // 运行的误差
   }
 
   start() {
@@ -35,7 +37,8 @@ export class Snake extends GameObject {
   }
 
   update() {
-    this.updateBody()
+    if (this.gameMap.status === 'playing')
+      this.updateBody()
     this.render()
   }
 
@@ -51,6 +54,19 @@ export class Snake extends GameObject {
     if (a.x < b.x)
       return 1
     return 3
+  }
+
+  checkDie() {
+    const head = this.cells[0]
+    if (head.c < 0 || head.c >= 17 || head.r < 0 || head.r >= 15)
+      return true
+
+    for (let i = 2; i < this.cells.length; i++) {
+      if (head.c === this.cells[i].c && head.r === this.cells[i].r)
+        return true
+    }
+
+    return false
   }
 
   updateBody() {
@@ -72,19 +88,44 @@ export class Snake extends GameObject {
       newCells.push(new Cell(c, r)) // 复制一份蛇头，用于下一次移动
       for (let i = 1; i < k; i++)
         newCells.push(this.cells[i])
-
+      // 更新 cells
       this.cells = newCells
+
+      const ds = this.gameMap.directions
+      while (ds.length > 0 && (ds[0] === this.direction || ds[0] === (this.direction ^ 2)))
+        ds.splice(0, 1)
+
+      if (ds.length > 0) {
+        this.direction = ds[0]
+        ds.splice(0, 1)
+      }
+
+      if (this.checkDie())
+        this.gameMap.lose()
     }
   }
 
   render() {
-    const color = '#377BB5'
-    const { ctx, gameMap: { L } } = this
+    const { ctx, gameMap: { L }, color, eps } = this
     ctx.fillStyle = color
     for (const cell of this.cells) {
       ctx.beginPath()
-      ctx.arc(cell.x * L, cell.y * L, L / 2, 0, Math.PI * 2)
+      ctx.arc(cell.x * L, cell.y * L, L / 2 * 0.8, 0, Math.PI * 2)
       ctx.fill()
+    }
+
+    // 连接两格，将身体连起来
+    for (let i = 1; i < this.cells.length; i++) {
+      const a = this.cells[i - 1]; const b = this.cells[i]
+      if (Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps)
+        continue
+
+      if (Math.abs(a.x - b.x) < eps) { // 上下
+        this.ctx.fillRect((a.x - 0.5 + 0.1) * L, Math.min(a.y, b.y) * L, L * 0.8, Math.abs(a.y - b.y) * L)
+      }
+      else { // 左右
+        this.ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.5 + 0.1) * L, Math.abs(a.x - b.x) * L, L * 0.8)
+      }
     }
   }
 }

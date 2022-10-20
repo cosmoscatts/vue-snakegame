@@ -16,6 +16,6 @@ onMounted(() => {
     flex justify-center items-center
     :style="{ height: 'calc(100% - 8vh)' }"
   >
-    <canvas ref="refCanvas" />
+    <canvas ref="refCanvas" tabindex="0" />
   </div>
 </template>
