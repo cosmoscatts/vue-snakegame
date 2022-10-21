@@ -34,5 +34,6 @@ const restart = () => {
         开始游戏
       </button>
     </div>
+    <Confetti :passed="gameMap?.status === 'win'" />
   </div>
 </template>
