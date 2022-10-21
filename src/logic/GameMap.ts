@@ -1,8 +1,19 @@
+import { type Store } from 'pinia'
+import { type Ref } from 'vue'
 import { GameObject } from './GameObject'
 import { Snake } from './Snake'
 
 const COLOR_ODD = '#A2D048' // 奇数格颜色
 const COLOR_EVEN = '#AAD751' // 偶数格颜色
+
+interface T {
+  score: Ref<number>
+  record: Ref<number>
+  restart: Ref<boolean>
+  updateScore: (_score: number) => number
+  updateRecord: (_record: number) => number
+  updateRestart: (_restart: boolean) => boolean
+}
 
 /**
  * Map:
@@ -12,16 +23,18 @@ const COLOR_EVEN = '#AAD751' // 偶数格颜色
 export class GameMap extends GameObject {
   ctx: CanvasRenderingContext2D
   parentEl: HTMLDivElement
+  store: Store<'store', T>
   L: number
   directions: number[]
   status: 'waiting' | 'playing' | 'win' | 'lose'
   snake: Snake
 
-  constructor(ctx: CanvasRenderingContext2D, parentEl: HTMLDivElement) {
+  constructor(ctx: CanvasRenderingContext2D, parentEl: HTMLDivElement, store: Store<'store', T>) {
     super()
 
     this.ctx = ctx
     this.parentEl = parentEl
+    this.store = store
     this.L = 0 // 每一格的长度
     this.directions = [] // 存储用户的操作
     this.status = 'waiting' // 当前状态
@@ -32,6 +45,9 @@ export class GameMap extends GameObject {
     this.ctx.canvas.focus()
 
     this.ctx.canvas.addEventListener('keydown', (e) => {
+      if (this.store.restart)
+        return false
+
       if (e.key === 'w' || e.key === 'ArrowUp') {
         this.directions.push(0)
         e.preventDefault()
@@ -72,11 +88,22 @@ export class GameMap extends GameObject {
   win() {
     this.snake.color = 'white'
     this.status = 'win'
+    this.store.updateRestart(true)
   }
 
   lose() {
     this.snake.color = 'white'
     this.status = 'lose'
+    this.store.updateRestart(true)
+  }
+
+  restart() {
+    this.store.updateScore(0)
+    this.status = 'waiting'
+    this.store.updateRestart(false)
+    this.snake.destory()
+    this.snake = new Snake(this.ctx, this)
+    this.ctx.canvas.focus()
   }
 
   updateSize() {

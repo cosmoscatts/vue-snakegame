@@ -1,6 +1,7 @@
 import { Cell } from './Cell'
 import type { GameMap } from './GameMap'
 import { GameObject } from './GameObject'
+import ImageApple from '~/assets/apple.png'
 
 export class Snake extends GameObject {
   ctx: CanvasRenderingContext2D
@@ -13,6 +14,11 @@ export class Snake extends GameObject {
   dy: number[]
   speed: number
   eps: number
+
+  appleCell: Cell
+  appleImg: HTMLImageElement
+  eating: boolean
+  tailCell: Cell | null
 
   constructor(ctx: CanvasRenderingContext2D, gameMap: GameMap) {
     super()
@@ -27,6 +33,12 @@ export class Snake extends GameObject {
     this.dy = [-1, 0, 1, 0]
     this.speed = 8 // 每秒钟走几格
     this.eps = 1e-1 // 运行的误差
+
+    this.appleCell = new Cell(-1, -1)
+    this.appleImg = new Image()
+    this.appleImg.src = ImageApple
+    this.eating = false // 是否吃到苹果
+    this.tailCell = null // 保存下尾部，当吃到苹果时，重新加上尾部，相当于只动头部，否则头尾一起动
   }
 
   start() {
@@ -34,12 +46,35 @@ export class Snake extends GameObject {
     this.cells.push(new Cell(4, 7))
     for (let i = 4; i >= 1; i--)
       this.cells.push(new Cell(i, 7))
+
+    if (!this.gameMap.store.restart)
+      this.putAnApple()
   }
 
   update() {
     if (this.gameMap.status === 'playing')
       this.updateBody()
     this.render()
+  }
+
+  putAnApple() {
+    const positions = new Set<string>()
+    for (let i = 0; i < 17; i++) {
+      for (let j = 0; j < 15; j++)
+        positions.add(`${i}-${j}`)
+    }
+
+    for (const cell of this.cells)
+      positions.delete(`${cell.c}-${cell.r}`)
+
+    const items: string[] = Array.from(positions)
+    if (items.length === 0) { this.gameMap.win() }
+    else {
+      const [_x, _y] = items[Math.floor(Math.random() * items.length)].split('-')
+      const x = parseInt(_x)
+      const y = parseInt(_y)
+      this.appleCell = new Cell(x, y)
+    }
   }
 
   getTailDirection(a: Cell, b: Cell) {
@@ -91,6 +126,12 @@ export class Snake extends GameObject {
       // 更新 cells
       this.cells = newCells
 
+      if (this.eating && this.tailCell) {
+        this.cells.push(this.tailCell)
+        this.eating = false
+        this.tailCell = null
+      }
+
       const ds = this.gameMap.directions
       while (ds.length > 0 && (ds[0] === this.direction || ds[0] === (this.direction ^ 2)))
         ds.splice(0, 1)
@@ -102,11 +143,30 @@ export class Snake extends GameObject {
 
       if (this.checkDie())
         this.gameMap.lose()
+
+      // 吃到苹果
+      if (this.appleCell.c === c && this.appleCell.r === r) {
+        this.eating = true
+        const cell = this.cells[this.cells.length - 1]
+        this.tailCell = new Cell(cell.c, cell.r) // 需要重新创建，不能直接引用原尾部
+        this.putAnApple()
+        const score = this.gameMap.store.score + 1
+        this.gameMap.store.updateScore(score)
+        this.gameMap.store.updateRecord(score)
+      }
     }
   }
 
   render() {
     const { ctx, gameMap: { L }, color, eps } = this
+
+    // 如果吃到苹果，则重新将蛇尾残影添加到 cells 末尾
+    if (this.eating && this.tailCell)
+      this.cells.push(this.tailCell)
+
+    // 画苹果
+    ctx.drawImage(this.appleImg, this.appleCell.c * L, this.appleCell.r * L, L, L)
+
     ctx.fillStyle = color
     for (const cell of this.cells) {
       ctx.beginPath()
@@ -127,5 +187,9 @@ export class Snake extends GameObject {
         this.ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.5 + 0.1) * L, Math.abs(a.x - b.x) * L, L * 0.8)
       }
     }
+
+    // 渲染结束，如果吃到苹果添加了蛇尾残影，需要删除
+    if (this.eating && this.tailCell)
+      this.cells.pop()
   }
 }

@@ -8,6 +8,7 @@ specifiers:
   '@vitejs/plugin-vue': ^3.1.0
   '@vueuse/core': ^9.3.1
   eslint: ^8.25.0
+  pinia: ^2.0.23
   pnpm: ^7.13.5
   typescript: ^4.6.4
   unocss: ^0.45.30
@@ -20,6 +21,7 @@ specifiers:
 dependencies:
   '@unocss/reset': registry.npmmirror.com/@unocss/reset/0.45.30
   '@vueuse/core': registry.npmmirror.com/@vueuse/core/9.3.1_vue@3.2.41
+  pinia: registry.npmmirror.com/pinia/2.0.23_l7r24p6nevbtlimqmqcwa3ouhu
   vue: registry.npmmirror.com/vue/3.2.41
 
 devDependencies:
@@ -914,6 +916,12 @@ packages:
     dependencies:
       '@vue/compiler-dom': registry.npmmirror.com/@vue/compiler-dom/3.2.41
       '@vue/shared': registry.npmmirror.com/@vue/shared/3.2.41
+
+  registry.npmmirror.com/@vue/devtools-api/6.4.5:
+    resolution: {integrity: sha512-JD5fcdIuFxU4fQyXUu3w2KpAJHzTVdN+p4iOX2lMWSHMOoQdMAcpFLZzm9Z/2nmsoZ1a96QEhZ26e50xLBsgOQ==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@vue/devtools-api/-/devtools-api-6.4.5.tgz}
+    name: '@vue/devtools-api'
+    version: 6.4.5
+    dev: false
 
   registry.npmmirror.com/@vue/reactivity-transform/3.2.41:
     resolution: {integrity: sha512-mK5+BNMsL4hHi+IR3Ft/ho6Za+L3FA5j8WvreJ7XzHrqkPq8jtF/SMo7tuc9gHjLDwKZX1nP1JQOKo9IEAn54A==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/@vue/reactivity-transform/-/reactivity-transform-3.2.41.tgz}
@@ -3379,6 +3387,27 @@ packages:
     version: 2.3.1
     engines: {node: '>=8.6'}
     dev: true
+
+  registry.npmmirror.com/pinia/2.0.23_l7r24p6nevbtlimqmqcwa3ouhu:
+    resolution: {integrity: sha512-N15hFf4o5STrxpNrib1IEb1GOArvPYf1zPvQVRGOO1G1d74Ak0J0lVyalX/SmrzdT4Q0nlEFjbURsmBmIGUR5Q==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/pinia/-/pinia-2.0.23.tgz}
+    id: registry.npmmirror.com/pinia/2.0.23
+    name: pinia
+    version: 2.0.23
+    peerDependencies:
+      '@vue/composition-api': ^1.4.0
+      typescript: '>=4.4.4'
+      vue: ^2.6.14 || ^3.2.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      '@vue/devtools-api': registry.npmmirror.com/@vue/devtools-api/6.4.5
+      typescript: registry.npmmirror.com/typescript/4.8.4
+      vue: registry.npmmirror.com/vue/3.2.41
+      vue-demi: registry.npmmirror.com/vue-demi/0.13.11_vue@3.2.41
+    dev: false
 
   registry.npmmirror.com/pkg-types/0.3.5:
     resolution: {integrity: sha512-VkxCBFVgQhNHYk9subx+HOhZ4jzynH11ah63LZsprTKwPCWG9pfWBlkElWFbvkP9BVR0dP1jS9xPdhaHQNK74Q==, registry: http://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/pkg-types/-/pkg-types-0.3.5.tgz}

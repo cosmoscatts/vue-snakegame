@@ -26,8 +26,8 @@ export class GameObject {
     this.beforeDestory()
 
     for (const i in GAME_OBJECTS) {
-      const game = GAME_OBJECTS[i]
-      if (game === this) {
+      const obj = GAME_OBJECTS[i]
+      if (obj === toRaw(this)) {
         GAME_OBJECTS.splice(Number(i), 1)
         break
       }
