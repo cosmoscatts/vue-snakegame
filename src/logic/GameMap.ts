@@ -89,14 +89,12 @@ export class GameMap extends GameObject {
     this.snake.color = 'white'
     this.status = 'win'
     this.store.updateRestart(true)
-    alert('you win!')
   }
 
   lose() {
     this.snake.color = 'white'
     this.status = 'lose'
     this.store.updateRestart(true)
-    alert('you lose!')
   }
 
   restart() {
