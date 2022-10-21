@@ -15,6 +15,9 @@ export class Snake extends GameObject {
   speed: number
   eps: number
 
+  eyeDx: number[][]
+  eyeDy: number[][]
+
   appleCell: Cell
   appleImg: HTMLImageElement
   eating: boolean
@@ -31,8 +34,21 @@ export class Snake extends GameObject {
     this.direction = 1 // 蛇头的方向
     this.dx = [0, 1, 0, -1]
     this.dy = [-1, 0, 1, 0]
-    this.speed = 8 // 每秒钟走几格
+    this.speed = 7 // 每秒钟走几格
     this.eps = 1e-1 // 运行的误差
+
+    this.eyeDx = [ // 蛇眼睛横向偏移量
+      [-1, 1],
+      [1, 1],
+      [1, -1],
+      [-1, -1],
+    ]
+    this.eyeDy = [ // 蛇眼睛横向偏移量
+      [-1, -1],
+      [-1, 1],
+      [1, 1],
+      [1, -1],
+    ]
 
     this.appleCell = new Cell(-1, -1)
     this.appleImg = new Image()
@@ -188,8 +204,48 @@ export class Snake extends GameObject {
       }
     }
 
+    // 画蛇的眼睛
+    const head = this.cells[0]
+    for (let i = 0; i < 2; i++) {
+      const eyeX = (head.x + this.eyeDx[this.direction][i] * 0.18) * L
+      const eyeY = (head.y + this.eyeDy[this.direction][i] * 0.18) * L
+
+      // 先画外围椭圆
+      ctx.fillStyle = 'white'
+      const width = [1, 3].includes(this.direction) ? 0.4 * L : 0.3 * L
+      const height = [1, 3].includes(this.direction) ? 0.3 * L : 0.4 * L
+      this.drawEllipse(ctx, eyeX - width / 2, eyeY - height / 2, width, height)
+
+      ctx.beginPath()
+      ctx.fillStyle = 'black'
+      ctx.arc(eyeX, eyeY, L * 0.05, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
     // 渲染结束，如果吃到苹果添加了蛇尾残影，需要删除
     if (this.eating && this.tailCell)
       this.cells.pop()
+  }
+
+  /**
+   * 画椭圆
+   */
+  drawEllipse(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number) {
+    const kappa = 0.5522848
+    const ox = (w / 2) * kappa // control point offset horizontal
+    const oy = (h / 2) * kappa // control point offset vertical
+    const xe = x + w // x-end
+    const ye = y + h // y-end
+    const xm = x + w / 2 // x-middle
+    const ym = y + h / 2 // y-middle
+
+    ctx.beginPath()
+    ctx.moveTo(x, ym)
+    ctx.bezierCurveTo(x, ym - oy, xm - ox, y, xm, y)
+    ctx.bezierCurveTo(xm + ox, y, xe, ym - oy, xe, ym)
+    ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye)
+    ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym)
+    ctx.closePath()
+    ctx.fill()
   }
 }
