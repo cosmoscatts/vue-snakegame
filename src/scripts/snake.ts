@@ -1,75 +1,60 @@
-import { Cell } from './Cell'
-import type { GameMap } from './GameMap'
-import { GameObject } from './GameObject'
+import { Cell } from './cell'
+import type { GameMap } from './map'
+import { Game } from './game'
 import ImageApple from '~/assets/apple.png'
 
-export class Snake extends GameObject {
+export class Snake extends Game {
   ctx: CanvasRenderingContext2D
   gameMap: GameMap
-  cells: Cell[]
+  cells: Cell[] = []
 
-  color: string
-  direction: number
-  dx: number[]
-  dy: number[]
-  speed: number
-  eps: number
+  color = '#377BB5'
+  direction = 1 // 蛇头的方向
+  dx: number[] = [0, 1, 0, -1]
+  dy: number[] = [-1, 0, 1, 0]
+  speed = 7 // 每秒钟走几格
+  eps = 1e-1 // 运行的误差
 
-  eyeDx: number[][]
-  eyeDy: number[][]
+  eyeDx: number[][] = [ // 蛇眼睛横向偏移量
+    [-1, 1],
+    [1, 1],
+    [1, -1],
+    [-1, -1],
+  ]
+
+  eyeDy: number[][] = [ // 蛇眼睛横向偏移量
+    [-1, -1],
+    [-1, 1],
+    [1, 1],
+    [1, -1],
+  ]
 
   appleCell: Cell
   appleImg: HTMLImageElement
-  eating: boolean
-  tailCell: Cell | null
+  eating = false // 是否吃到苹果
+  tailCell: Cell | null = null // 保存下尾部，当吃到苹果时，重新加上尾部，相当于只动头部，否则头尾一起动
 
   constructor(ctx: CanvasRenderingContext2D, gameMap: GameMap) {
     super()
 
     this.ctx = ctx
     this.gameMap = gameMap
-    this.cells = []
-
-    this.color = '#377BB5'
-    this.direction = 1 // 蛇头的方向
-    this.dx = [0, 1, 0, -1]
-    this.dy = [-1, 0, 1, 0]
-    this.speed = 7 // 每秒钟走几格
-    this.eps = 1e-1 // 运行的误差
-
-    this.eyeDx = [ // 蛇眼睛横向偏移量
-      [-1, 1],
-      [1, 1],
-      [1, -1],
-      [-1, -1],
-    ]
-    this.eyeDy = [ // 蛇眼睛横向偏移量
-      [-1, -1],
-      [-1, 1],
-      [1, 1],
-      [1, -1],
-    ]
 
     this.appleCell = new Cell(-1, -1)
     this.appleImg = new Image()
     this.appleImg.src = ImageApple
-    this.eating = false // 是否吃到苹果
-    this.tailCell = null // 保存下尾部，当吃到苹果时，重新加上尾部，相当于只动头部，否则头尾一起动
   }
 
   start() {
     // 蛇头需要复制一份
     this.cells.push(new Cell(4, 7))
-    for (let i = 4; i >= 1; i--)
-      this.cells.push(new Cell(i, 7))
+    for (let i = 4; i >= 1; i--) this.cells.push(new Cell(i, 7))
 
-    if (!this.gameMap.store.restart)
-      this.putAnApple()
+    if (!this.gameMap.store.restart) this.putAnApple()
   }
 
   update() {
-    if (this.gameMap.status === 'playing')
-      this.updateBody()
+    if (this.gameMap.status === 'playing') this.updateBody()
     this.render()
   }
 
@@ -80,8 +65,7 @@ export class Snake extends GameObject {
         positions.add(`${i}-${j}`)
     }
 
-    for (const cell of this.cells)
-      positions.delete(`${cell.c}-${cell.r}`)
+    for (const cell of this.cells) positions.delete(`${cell.c}-${cell.r}`)
 
     const items: string[] = Array.from(positions)
     if (items.length === 0) { this.gameMap.win() }
@@ -95,28 +79,21 @@ export class Snake extends GameObject {
 
   getTailDirection(a: Cell, b: Cell) {
     const { eps } = this
-    if (Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps)
-      return -1
+    if (Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps) return -1
     if (Math.abs(a.x - b.x) < eps) {
-      if (a.y < b.y)
-        return 2
+      if (a.y < b.y) return 2
       return 0
     }
-    if (a.x < b.x)
-      return 1
+    if (a.x < b.x) return 1
     return 3
   }
 
   checkDie() {
     const head = this.cells[0]
-    if (head.c < 0 || head.c >= 17 || head.r < 0 || head.r >= 15)
-      return true
-
+    if (head.c < 0 || head.c >= 17 || head.r < 0 || head.r >= 15) return true
     for (let i = 2; i < this.cells.length; i++) {
-      if (head.c === this.cells[i].c && head.r === this.cells[i].r)
-        return true
+      if (head.c === this.cells[i].c && head.r === this.cells[i].r) return true
     }
-
     return false
   }
 
@@ -129,16 +106,14 @@ export class Snake extends GameObject {
       this.cells[k].y += distance * this.dy[d]
       this.cells[0].x += distance * this.dx[this.direction]
       this.cells[0].y += distance * this.dy[this.direction]
-    }
-    else {
+    } else {
       const newCells: Cell[] = []
       // 重新计算蛇头坐标
       const c = this.cells[1].c + this.dx[this.direction]
       const r = this.cells[1].r + this.dy[this.direction]
       newCells.push(new Cell(c, r))
       newCells.push(new Cell(c, r)) // 复制一份蛇头，用于下一次移动
-      for (let i = 1; i < k; i++)
-        newCells.push(this.cells[i])
+      for (let i = 1; i < k; i++) newCells.push(this.cells[i])
       // 更新 cells
       this.cells = newCells
 
@@ -157,8 +132,7 @@ export class Snake extends GameObject {
         ds.splice(0, 1)
       }
 
-      if (this.checkDie())
-        this.gameMap.lose()
+      if (this.checkDie()) this.gameMap.lose()
 
       // 吃到苹果
       if (this.appleCell.c === c && this.appleCell.r === r) {
@@ -177,8 +151,7 @@ export class Snake extends GameObject {
     const { ctx, gameMap: { L }, color, eps } = this
 
     // 如果吃到苹果，则重新将蛇尾残影添加到 cells 末尾
-    if (this.eating && this.tailCell)
-      this.cells.push(this.tailCell)
+    if (this.eating && this.tailCell) this.cells.push(this.tailCell)
 
     // 画苹果
     ctx.drawImage(this.appleImg, this.appleCell.c * L, this.appleCell.r * L, L, L)
@@ -193,13 +166,11 @@ export class Snake extends GameObject {
     // 连接两格，将身体连起来
     for (let i = 1; i < this.cells.length; i++) {
       const a = this.cells[i - 1]; const b = this.cells[i]
-      if (Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps)
-        continue
+      if (Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps) continue
 
       if (Math.abs(a.x - b.x) < eps) { // 上下
         this.ctx.fillRect((a.x - 0.5 + 0.1) * L, Math.min(a.y, b.y) * L, L * 0.8, Math.abs(a.y - b.y) * L)
-      }
-      else { // 左右
+      } else { // 左右
         this.ctx.fillRect(Math.min(a.x, b.x) * L, (a.y - 0.5 + 0.1) * L, Math.abs(a.x - b.x) * L, L * 0.8)
       }
     }
@@ -223,8 +194,7 @@ export class Snake extends GameObject {
     }
 
     // 渲染结束，如果吃到苹果添加了蛇尾残影，需要删除
-    if (this.eating && this.tailCell)
-      this.cells.pop()
+    if (this.eating && this.tailCell) this.cells.pop()
   }
 
   /**

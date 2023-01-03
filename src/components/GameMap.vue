@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { GameMap } from '~/logic/GameMap'
+import { GameMap } from '~/scripts/map'
 import { useStore } from '~/store'
 
 const refParentEl = ref<HTMLDivElement>()
@@ -12,9 +12,7 @@ onMounted(() => {
   gameMap.value = new GameMap(refCanvas.value!.getContext('2d')!, refParentEl.value!, store as any)
 })
 
-const restart = () => {
-  gameMap.value?.restart()
-}
+const restart = () => gameMap.value?.restart()
 
 let showMessageBox = $ref(false)
 watch(() => gameMap.value?.status, (val) => {

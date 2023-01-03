@@ -1,8 +1,8 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import Vue from '@vitejs/plugin-vue'
-import Components from 'unplugin-vue-components/vite'
 import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
 import UnoCSS from 'unocss/vite'
 import { presetAttributify, presetIcons, presetUno } from 'unocss'
 
@@ -13,16 +13,15 @@ export default defineConfig({
     },
   },
   plugins: [
-    Vue({
-      reactivityTransform: true,
-    }),
-    Components(),
+    Vue({ reactivityTransform: true }),
+    Components({ dts: 'src/components.d.ts' }),
     AutoImport({
       imports: [
         'vue',
         'vue/macros',
         '@vueuse/core',
       ],
+      dts: 'src/auto-imports.d.ts',
       vueTemplate: true,
     }),
     UnoCSS({

@@ -1,7 +1,7 @@
 import { type Store } from 'pinia'
 import { type Ref } from 'vue'
-import { GameObject } from './GameObject'
-import { Snake } from './Snake'
+import { Game } from './game'
+import { Snake } from './snake'
 
 const COLOR_ODD = '#A2D048' // 奇数格颜色
 const COLOR_EVEN = '#AAD751' // 偶数格颜色
@@ -20,13 +20,13 @@ interface T {
  *  - 宽 17 格
  *  - 高 15 格
  */
-export class GameMap extends GameObject {
+export class GameMap extends Game {
   ctx: CanvasRenderingContext2D
   parentEl: HTMLDivElement
   store: Store<'store', T>
-  L: number
-  directions: number[]
-  status: 'waiting' | 'playing' | 'win' | 'lose'
+  L = 0 // 每一格的长度
+  directions: number[] = [] // 存储用户的操作
+  status: 'waiting' | 'playing' | 'win' | 'lose' = 'waiting' // 当前状态
   snake: Snake
 
   constructor(ctx: CanvasRenderingContext2D, parentEl: HTMLDivElement, store: Store<'store', T>) {
@@ -35,9 +35,6 @@ export class GameMap extends GameObject {
     this.ctx = ctx
     this.parentEl = parentEl
     this.store = store
-    this.L = 0 // 每一格的长度
-    this.directions = [] // 存储用户的操作
-    this.status = 'waiting' // 当前状态
     this.snake = new Snake(this.ctx, this)
   }
 
@@ -45,32 +42,30 @@ export class GameMap extends GameObject {
     this.ctx.canvas.focus()
 
     this.ctx.canvas.addEventListener('keydown', (e) => {
-      if (this.store.restart)
-        return false
+      if (this.store.restart) return false
 
       if (e.key === 'w' || e.key === 'ArrowUp') {
         this.directions.push(0)
         e.preventDefault()
-      }
-      else if (e.key === 'd' || e.key === 'ArrowRight') {
+      } else if (e.key === 'd' || e.key === 'ArrowRight') {
         this.directions.push(1)
         e.preventDefault()
-      }
-      else if (e.key === 's' || e.key === 'ArrowDown') {
+      } else if (e.key === 's' || e.key === 'ArrowDown') {
         this.directions.push(2)
         e.preventDefault()
-      }
-      else if (e.key === 'a' || e.key === 'ArrowLeft') {
+      } else if (e.key === 'a' || e.key === 'ArrowLeft') {
         this.directions.push(3)
         e.preventDefault()
       }
 
       const k = this.directions.length
-      if (k > 1 && this.directions[k - 1] === this.directions[k - 2])
+      if (k > 1 && this.directions[k - 1] === this.directions[k - 2]) {
         this.directions.pop()
+      }
 
-      while (this.directions.length > 2)
+      while (this.directions.length > 2) {
         this.directions.splice(0, 1)
+      }
 
       // 第一次操作时，设置开始游戏状态
       if (this.status === 'waiting' && this.directions.length && this.directions[0] !== 3) {

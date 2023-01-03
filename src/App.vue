@@ -1,15 +1,17 @@
-<script setup lang="ts">
-
-</script>
-
 <template>
-  <div h-screen flex="~ col" justify-center items-center>
+  <div
+    h-screen
+    flex="~ col"
+    justify-center
+    items-center
+    py20px
+  >
     <Navbar />
     <PlayGround lt-sm:hidden />
     <div
       sm:hidden
-      hw-full
-      flex-center
+      hfull wfull
+      flex justify-center items-center
       text-lg
     >
       {  请在客户端访问 :). }
@@ -17,6 +19,3 @@
   </div>
 </template>
 
-<style scoped>
-
-</style>
