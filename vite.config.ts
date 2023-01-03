@@ -14,7 +14,6 @@ export default defineConfig({
   },
   plugins: [
     Vue({ reactivityTransform: true }),
-    Components({ dts: 'src/components.d.ts' }),
     AutoImport({
       imports: [
         'vue',
@@ -24,6 +23,7 @@ export default defineConfig({
       dts: 'src/auto-imports.d.ts',
       vueTemplate: true,
     }),
+    Components({ dts: 'src/components.d.ts' }),
     UnoCSS({
       shortcuts: {
         'icon-btn': 'op30 hover:(op100 text-primary)',
